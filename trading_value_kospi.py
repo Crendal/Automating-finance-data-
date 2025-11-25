@@ -123,3 +123,16 @@ with pd.ExcelWriter(path, engine="openpyxl", mode="a", if_sheet_exists="replace"
     kospi_liquidity.to_excel(writer, sheet_name="Kospi_Liquidity", index=True)
 
 print("Kospi_Liquidity data saved successfully!")
+
+# output column
+## Foreign Net Buying (Daily) [KOSPI]
+## Foreign Net Buying (YTD Cumulative) [KOSPI]
+## Foreign Net Buying (Recent 20 Trading Days Cumulative) [KOSPI]
+## Daily Net Buying Z-score (Historical) [KOSPI]
+## Recent 20 Trading Days Cumulative Z-score (60D) [KOSPI]
+
+## Foreign Net Buying (Daily) [KOSPI+KOSDAQ]
+## Foreign Net Buying (YTD Cumulative) [KOSPI+KOSDAQ]
+## Foreign Net Buying (Recent 20 Trading Days Cumulative) [KOSPI+KOSDAQ]
+## Daily Net Buying Z-score (Historical) [KOSPI+KOSDAQ]
+## Recent 20 Trading Days Cumulative Z-score (60D) [KOSPI+KOSDAQ]

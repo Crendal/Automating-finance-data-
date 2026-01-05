@@ -1,0 +1,121 @@
+If TMEP.Range("F99").End(xlUp).Row = 4 Then
+    Application.ScreenUpdating = True
+    Application.EnableEvents = True
+    
+    'NIL일 때도 CRF 보고서 생성
+    Application.DisplayAlerts = False
+    Set CRFWB = Workbooks.Open(cellQZRptCRF, , False)
+    Application.DisplayAlerts = True
+    Set crfWS = QZCRFWB.Sheets("report")
+    
+    Set newCRFWB = Workbooks.Add
+    newCRFWB.SaveAs Filename:=cellCRFlocation + cellCRFname + ".xlsx"
+    crfWS.Cells.Copy
+    newCRFWB.Sheets(1).Range("A1").PasteSpecial xlValues
+    newCRFWB.Sheets(1).Range("A1").PasteSpecial xlFormats
+    newCRFWB.Sheets(1).Name = "report"
+    newCRFWB.Save
+    
+    'NIL 이메일 본문 생성
+    crfWS.Unprotect ("6070")
+    TMEP.Cells.Clear
+    TMEP.Range("A1") = "Hi,"
+    TMEP.Range("A3") = "Please review and approve - NIL"
+    
+    'Trade date 추가
+    TMEP.Range("A5") = "Trade date : " & MM.Cells(12, 4)
+    MM.Range("E92:M96").SpecialCells(xlCellTypeVisible).Copy
+    TMEP.Range("A8").PasteSpecial xlValues
+    TMEP.Range("A8").PasteSpecial xlFormats
+    
+    'CRF Report 추가
+    TMEP.Range("A15") = "***REPORT - NIL***"
+    crfWS.Range("A1:K26").SpecialCells(xlCellTypeVisible).Copy
+    TMEP.Range("A16").PasteSpecial xlValues
+    TMEP.Range("A16").PasteSpecial xlFormats
+    TMEP.Columns("H:H").Delete
+    
+    'MEP TODAY 정보 추가 (NIL이므로 헤더만)
+    TMEP.Range("A38") = "***LEDGER Today - NIL***"
+    TMEP.Range("A39") = "No entries detected"
+    QZCRFWB.Sheets("MEP_TODAY").Range("B1:N1").Copy  '헤더만 복사
+    TMEP.Range("A40").PasteSpecial xlValues
+    TMEP.Range("A40").PasteSpecial xlFormats
+    
+    TMEP.Range("A42") = "Thanks and regards,"
+    TMEP.Range("A43") = "BANA KR GMO"
+    crfWS.Protect ("6070")
+    
+    With TMEP.Cells.Font
+        .Name = "Calibri"
+        .Size = 10
+    End With
+    TMEP.Cells.EntireColumn.AutoFit
+    
+    Set OutApp = CreateObject("outlook.application")
+    Set OutMail = OutApp.CreateItem(0)
+    With OutMail
+        .To = cellMEPemailCRFto.Value
+        .CC = cellMEPemailCRFcc.Value
+        .Subject = cellMEPemailCRFsub.Value & " - NIL"
+        .HTMLBody = RangetoHTML(TMEP.Cells)
+        .attachments.Add cellBrokerNH.Value
+        .attachments.Add cellBrokerSSCombined.Value
+        .attachments.Add newCRFWB.FullName
+        .Display
+        .Save
+    End With
+    
+    Set OutMail = Nothing
+    Set OutApp = Nothing
+    
+    MsgBox ("No LEDGER Today entries detected. NIL email created.")
+    
+    Application.DisplayAlerts = False
+    TMEP.Delete
+    Application.DisplayAlerts = True
+    Exit Sub
+End If
+
+
+
+
+
+If TMEP.Range("F99").End(xlUp).Row = 4 Then
+    Application.ScreenUpdating = True
+    Application.EnableEvents = True
+    
+    'NIL 이메일 생성
+    TMEP.Cells.Clear
+    TMEP.Range("A1") = "Hi,"
+    TMEP.Range("A3") = "NIL - No LEDGER Tomorrow entries detected from CRFutures report."
+    TMEP.Range("A5") = "Thanks and regards,"
+    TMEP.Range("A6") = "BANA KR GMO"
+    
+    With TMEP.Cells.Font
+        .Name = "Calibri"
+        .Size = 10
+    End With
+    TMEP.Cells.EntireColumn.AutoFit
+    
+    Set OutApp = CreateObject("outlook.application")
+    Set OutMail = OutApp.CreateItem(0)
+    With OutMail
+        .To = cellMEPemailCRFto.Value
+        .CC = cellMEPemailCRFcc.Value
+        .Subject = cellMEPemailCRFsub.Value & " - NIL"
+        .HTMLBody = RangetoHTML(TMEP.Cells)
+        .Display
+        .Save
+    End With
+    
+    Set OutMail = Nothing
+    Set OutApp = Nothing
+    
+    MsgBox ("No LEDGER Tomorrow entries detected. NIL email created.")
+    
+    Application.DisplayAlerts = False
+    TMEP.Delete
+    Application.DisplayAlerts = True
+    Exit Sub
+End If
